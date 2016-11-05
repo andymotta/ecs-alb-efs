@@ -1,0 +1,4 @@
+## copy this to terraform.tfvars and edit
+
+access_key = ""
+secret_key = ""
