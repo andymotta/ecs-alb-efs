@@ -218,13 +218,14 @@ resource "aws_ecs_task_definition" "td" {
 resource "aws_ecs_service" "web" {
   name            = "${var.resource_tag}-ecs-${element(split(",", var.container_name),0)}"
   cluster         = "${aws_ecs_cluster.main.id}"
-  task_definition = "${element(aws_ecs_task_definition.td.*.arn, count.index)}"
-  desired_count   = "${element(split(",", var.desired_count), count.index)}"
+  task_definition = "${element(aws_ecs_task_definition.td.*.arn, 0)}"
+  desired_count   = "${element(split(",", var.desired_count),0)}"
+  deployment_minimum_healthy_percent = 50
   iam_role        = "${aws_iam_role.ecs_service.name}"
   load_balancer {
     target_group_arn = "${aws_alb_target_group.web.id}"
-    container_name   = "${element(split(",", var.container_name), count.index)}"
-    container_port   = "${element(split(",", var.container_port), count.index)}"
+    container_name   = "${element(split(",", var.container_name),0)}"
+    container_port   = "${element(split(",", var.container_port),0)}"
   }
   depends_on = [
     "aws_iam_role_policy.ecs_service",
@@ -237,6 +238,7 @@ resource "aws_ecs_service" "api" {
   cluster         = "${aws_ecs_cluster.main.id}"
   task_definition = "${element(aws_ecs_task_definition.td.*.arn, count.index + 1 )}"
   desired_count   = "${element(split(",", var.desired_count), count.index + 1)}"
+  deployment_minimum_healthy_percent = 50
   iam_role        = "${aws_iam_role.ecs_service.name}"
   load_balancer {
     target_group_arn = "${element(aws_alb_target_group.api.*.id, count.index)}"
