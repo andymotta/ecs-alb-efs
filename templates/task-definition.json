@@ -3,9 +3,9 @@
     "name": "${container_name}",
     "image": "${image_url}",
     "cpu": 256,
-    "memory": 512,
+    "memory": 256,
     "entryPoint": [],
-    "environment": [{ "name" : "ENDPOINT", "value" : "${alb}" }],
+    "environment": [{ "name" : "ENDPOINT", "value" : "${alb}" },{ "name" : "${name}", "value" : "${value}" }],
     "portMappings": [
       {
         "hostPort": 0,

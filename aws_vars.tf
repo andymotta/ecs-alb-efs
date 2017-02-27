@@ -1,18 +1,6 @@
-# aws creds
-variable "access_key" {}
-variable "secret_key" {}
-
-# container vars
-variable "ecr_account" { default = "048844758804" }
-variable "namespace" { default = "microservices"}
-variable "container_name" { default = "product-web,products" }
-variable "container_port" { default = "8000,8001" }
-variable "desired_count" { default = "2,2" }
-variable "version_tag" { default = "latest,latest" }
-
 variable "resource_tag" {
   description = "Name Tag to precede all resources"
-  default = "MCSV-POC"
+  default = "project-dev"
 }
 
 variable "aws_region" {
@@ -25,18 +13,22 @@ variable "cidr_block" {
   default     = "10.10.0.0/16"
 }
 
+variable "enable_dns_hostnames" { default = true }
+variable "enable_dns_support" { default = true }
+
 variable "az_count" {
   description = "Number of AZs to cover in a given AWS region"
   default     = "2"
 }
 
-variable "key_name" {
-  description = "Name of AWS key pair"
+variable "profile" {
+  description = "Target AWS account for this deployment via .aws/credentials"
+  default = ""
 }
 
 variable "instance_type" {
   default     = "t2.small"
-  description = "AWS instance type"
+  description = "AWS EC2 instance type behind this ECS cluster"
 }
 
 variable "asg_min" {
@@ -54,6 +46,12 @@ variable "asg_desired" {
   default     = "2"
 }
 
-variable "admin_cidr_ingress" {
-  description = "CIDR to allow tcp/22 ingress to EC2 instance"
+variable "bucket_name" {
+  description = "S3 Bucket to store remote state"
+  default = "ecs-alb-efs-terraform-state"
+}
+
+variable "internal_elb" {
+  description = "Make ALB private? (Compute nodes are always private under ALB)"
+  default = false
 }

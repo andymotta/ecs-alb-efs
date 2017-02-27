@@ -9,6 +9,7 @@
         "ecs:DiscoverPollEndpoint",
         "ecs:Poll",
         "ecs:RegisterContainerInstance",
+        "ecs:StartTelemetrySession",
         "ecs:Submit*",
         "ecr:BatchCheckLayerAvailability",
         "ecr:BatchGetImage",
