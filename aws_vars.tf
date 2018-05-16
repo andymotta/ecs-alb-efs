@@ -1,6 +1,6 @@
 variable "resource_tag" {
   description = "Name Tag to precede all resources"
-  default = "project-dev"
+  default     = "ecs-alb-efs"
 }
 
 variable "aws_region" {
@@ -13,8 +13,13 @@ variable "cidr_block" {
   default     = "10.10.0.0/16"
 }
 
-variable "enable_dns_hostnames" { default = true }
-variable "enable_dns_support" { default = true }
+variable "enable_dns_hostnames" {
+  default = true
+}
+
+variable "enable_dns_support" {
+  default = true
+}
 
 variable "az_count" {
   description = "Number of AZs to cover in a given AWS region"
@@ -23,7 +28,7 @@ variable "az_count" {
 
 variable "profile" {
   description = "Target AWS account for this deployment via .aws/credentials"
-  default = ""
+  default     = ""
 }
 
 variable "instance_type" {
@@ -48,10 +53,10 @@ variable "asg_desired" {
 
 variable "bucket_name" {
   description = "S3 Bucket to store remote state"
-  default = "ecs-alb-efs-terraform-state"
+  default     = "ecs-alb-efs-terraform-state"
 }
 
 variable "internal_elb" {
   description = "Make ALB private? (Compute nodes are always private under ALB)"
-  default = false
+  default     = false
 }

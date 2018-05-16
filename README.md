@@ -1,5 +1,7 @@
 # Microservices on ECS
 
+[![Build Status](https://travis-ci.org/andymotta/ecs-alb-efs.svg?branch=master)](https://travis-ci.org/andymotta/ecs-alb-efs)   Terraform v0.11.7
+
 This project was created to provide a pipeline for ECS cluster deployments at scale.  If you have microservices in containers that could benefit from ALB architecture, this template will be able to configure and deploy them, using the latest ECS-Optimized Amazon Linux AMIs to take advantage of IAM roles for tasks.
 
 A few production-ready efforts are implemented:
@@ -7,6 +9,7 @@ A few production-ready efforts are implemented:
 - `add_aws_policy` will set IAM policy *at the container-level*, not at the instance-level
 - A log group will be created for each ECS service you specify in the container vars, which are easily filtered in CloudWatch Logs
 - Persistent storage is available out of the box with **EFS** which is available on the container's `/mnt`
+  - EFS is now encrypted both at REST and at transit
 - Upon deployment, the latest ECS-Optimized AMI will be used.  On update of the stack, releases of newer AMIs will not force new instances. (which can be disabled)
 - **Protip**: Set `env_key` or `env_value` for *container* environment variables like DB endpoints.  The ALB endpoint is in all containers by default at $ENDPOINT.
 
@@ -35,8 +38,10 @@ The path is slightly different for *Windows*: https://www.terraform.io/docs/prov
 
 Always run this first for syntax or logic check
 
+`terraform init` is now required before running these commands the first time
+
 ```bash
-ip=$(curl -s https://4.ifcfg.me/) && \
+ip="$(dig +short myip.opendns.com @resolver1.opendns.com)" && \
 terraform plan \
 	-var admin_cidr_ingress="${ip}/32" \
 	-var key_name=aws_key_name
@@ -108,6 +113,7 @@ Product web (2 containers) talks to a product api (2 containers) for products li
 For continuous delivery of this stack we can set up a Jenkins project that will check out this repository and add an execute shell step with a script like this:
 
 ### Jenkins Script
+Until we can add a Jenkinsfile
 
 ```bash
 rm -rf .terraform
@@ -136,10 +142,19 @@ echo "yes" | terraform ${action} \
   -var aws_policy=${aws_policy} \
   -var internal_elb=${internal_elb}
 ```
+Note that "Variables specified with the TF_VAR_ environment variables will be literal string values, just like -var."
+So it's possible to clean up the script a bit with some expections
+```bash
+/usr/local/sbin/terraform init
+/usr/local/sbin/terraform refresh \
+  -var profile=${ACCOUNT} \
+  -var add_aws_policy=${add_aws_policy} \
+  -var aws_policy=${aws_policy}
+echo "yes" | /usr/local/sbin/terraform ${action} \
+  -var profile=${ACCOUNT} \
+  -var add_aws_policy=${add_aws_policy} \
+  -var aws_policy=${aws_policy}
+  ```
 
 'Build with parameters' would look similar to the following:
 ![alb-routing](images/jenkins.png)
-
-### Roadmap:
-1. Allow per service IAM for task roles
-2. Automate Codebuild setup for ECS Pipeline in place of Jenkins Script

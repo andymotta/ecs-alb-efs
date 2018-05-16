@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_role" "ecs_service" {
-  name = "${var.resource_tag}_ecs_role"
+resource "aws_iam_role" "application" {
+  name = "${var.resource_tag}"
 
   assume_role_policy = <<EOF
 {
@@ -23,9 +23,9 @@ resource "aws_iam_role" "ecs_service" {
 EOF
 }
 
-resource "aws_iam_role_policy" "ecs_service" {
-  name = "${var.resource_tag}_ecs_policy"
-  role = "${aws_iam_role.ecs_service.name}"
+resource "aws_iam_role_policy" "application" {
+  name = "${var.resource_tag}"
+  role = "${aws_iam_role.application.name}"
 
   policy = <<EOF
 {
@@ -51,17 +51,17 @@ EOF
 resource "aws_iam_policy_attachment" "aws_managed" {
   count      = "${var.add_aws_policy ? 1 : 0}"
   name       = "${var.aws_policy}"
-  roles      = ["${aws_iam_role.ecs_service.name}"]
+  roles      = ["${aws_iam_role.application.name}"]
   policy_arn = "arn:aws:iam::aws:policy/${var.aws_policy}"
 }
 
-resource "aws_iam_instance_profile" "app" {
-  name  = "${var.resource_tag}-ecs-instprofile"
-  roles = ["${aws_iam_role.app_instance.name}"]
+resource "aws_iam_instance_profile" "ec2" {
+  name  = "${var.resource_tag}"
+  role = "${aws_iam_role.ec2.name}"
 }
 
-resource "aws_iam_role" "app_instance" {
-  name = "${var.resource_tag}-ecs-instance-role"
+resource "aws_iam_role" "ec2" {
+  name = "${var.resource_tag}-ec2"
 
   assume_role_policy = <<EOF
 {
@@ -83,11 +83,11 @@ EOF
 data "template_file" "instance_profile" {
   template = "${file("${path.module}/templates/instance-profile-policy.json")}"
   vars {
-    log_group_arn = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:${var.resource_tag}-ecs-group/*"
+    log_group_arn = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:${var.resource_tag}/*"
   }
 }
-resource "aws_iam_role_policy" "instance" {
-  name   = "${var.resource_tag}-EcsInstanceRole"
-  role   = "${aws_iam_role.app_instance.name}"
+resource "aws_iam_role_policy" "ec2" {
+  name   = "${var.resource_tag}-ec2"
+  role   = "${aws_iam_role.ec2.name}"
   policy = "${data.template_file.instance_profile.rendered}"
 }

@@ -1,0 +1,23 @@
+language: minimal
+
+env:
+  global:
+    - access_key_id=${AWS_ACCESS_KEY_ID}
+    - secret_access_key=${AWS_SECRET_ACCESS_KEY}
+
+matrix:        
+  include:
+    - env: TF_VER=0.11.7
+    - env: TF_VER=0.10.0
+    - env: TF_VER=0.9.0
+  allow_failures:
+    - env: TF_VER=0.10.0
+    - env: TF_VER=0.9.0
+
+before_script:
+- wget "https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip"
+- sudo unzip "terraform_${TF_VER}_linux_amd64.zip" -d /usr/local/bin
+
+script:
+- terraform init
+- terraform plan -var admin_cidr_ingress="127.0.0.1/32" -var key_name=""
